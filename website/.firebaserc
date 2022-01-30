@@ -1,0 +1,22 @@
+{
+  "projects": {
+    "dev": "malwoden-dev",
+    "prod": "malwoden-prod"
+  },
+  "targets": {
+    "malwoden-dev": {
+      "hosting": {
+        "tutorial": [
+          "malwoden-dev-tutorial"
+        ]
+      }
+    },
+    "malwoden-prod": {
+      "hosting": {
+        "tutorial": [
+          "malwoden-prod-tutorial"
+        ]
+      }
+    }
+  }
+}

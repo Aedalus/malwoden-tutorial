@@ -1,0 +1,49 @@
+{
+  "name": "malwoden-tutorial",
+  "version": "1.0.0",
+  "description": "A tutorial for the malwoden roguelike library",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve --mode development --progress --hot --config ./webpack.config.development.js",
+    "build": "webpack --mode production --config ./webpack.config.production.js",
+    "lint": "eslint ./src --max-warnings=0",
+    "fmt": "prettier --check .",
+    "fmt-fix": "prettier --write ."
+  },
+  "keywords": [
+    "typescript",
+    "webpack",
+    "scss"
+  ],
+  "author": "Alex Higgins",
+  "license": "MIT",
+  "dependencies": {
+    "ecsy": "0.4.2",
+    "malwoden": "0.5.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^7.0.0",
+    "css-loader": "^5.2.4",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.5.2",
+    "mini-css-extract-plugin": "^1.6.0",
+    "postcss": "^8.2.15",
+    "postcss-loader": "^5.3.0",
+    "postcss-preset-env": "^6.7.0",
+    "prettier": "2.4.1",
+    "sass": "^1.32.13",
+    "sass-loader": "^11.1.1",
+    "style-loader": "^2.0.0",
+    "terser-webpack-plugin": "^5.1.2",
+    "ts-loader": "^8.2.0",
+    "typescript": "^4.5.2",
+    "webpack": "^5.37.0",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
