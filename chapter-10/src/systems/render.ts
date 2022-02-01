@@ -122,7 +122,13 @@ export class RenderSystem extends System {
       }
     }
 
-    for (const e of results) {
+    const zIndexSort = results.sort((e1, e2) => {
+      const e1Render = e1.getComponent(Components.Renderable)!;
+      const e2Render = e2.getComponent(Components.Renderable)!;
+      return e1Render.zIndex - e2Render.zIndex;
+    });
+
+    for (const e of zIndexSort) {
       const p = e.getComponent(Components.Position)!;
       const r = e.getComponent(Components.Renderable)!;
 
@@ -137,12 +143,15 @@ export class RenderSystem extends System {
     const tilePos = this.game.terminal.windowToTilePoint(mousePos);
     const entities = this.game.map.getTileContent(tilePos);
     let labelName = "";
+    let highestZIndex = 0;
 
     for (const e of entities) {
       const nameComponent = e.getComponent(Components.Name);
-      if (nameComponent) {
+      const render = e.getComponent(Components.Renderable)!;
+
+      if (nameComponent && render.zIndex > highestZIndex) {
+        highestZIndex = render.zIndex;
         labelName = nameComponent.name;
-        break;
       }
     }
 
