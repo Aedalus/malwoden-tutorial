@@ -15,12 +15,13 @@ The tutorial currently covers the following chapters:
 - [x] 7 - Enemies
 - [x] 8 - Combat
 - [x] 9 - UI
+- [x] 10 - Inventory
 
 Coming soon! 
 
-- [ ] 10 - Inventory
-- [ ] 11 - Ranged Combat
-- [ ] 12 - More Dungeon Levels
-- [ ] 13 - Win/Loss Conditions
+- [ ] 11 - Using Items
+- [ ] 12 - Ranged Combat
+- [ ] 13 - More Dungeon Levels
+- [ ] 14 - Win/Loss Conditions
 
 If you have any suggestions or found any issues, please open a ticket on the [Malwoden Tutorial Repo](https://github.com/Aedalus/malwoden-tutorial). If you've enjoyed the tutorial so far, I'd really appreciate it if you could help support Malwoden by [buying a coffee](https://www.buymeacoffee.com/aedalus).
