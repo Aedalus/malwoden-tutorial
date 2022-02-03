@@ -5,3 +5,4 @@ export { MapIndexing } from "./map-indexing";
 export { MeleeCombat } from "./melee-combat";
 export { DamageSystem } from "./damage-system";
 export { DeathSystem } from "./death-system";
+export { InventorySystem } from "./inventory-system";

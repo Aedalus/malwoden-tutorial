@@ -36,6 +36,7 @@ export function generateLevel(config: GenerateLevelConfig): LevelData {
       power: 5,
       defense: 2,
     })
+    .addComponent(Components.Inventory)
     .addComponent(Components.Name, { name: "Player" });
 
   const rng = new Rand.AleaRNG();

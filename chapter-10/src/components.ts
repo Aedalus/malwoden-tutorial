@@ -90,17 +90,15 @@ export class Name extends Component<Name> {
 export class Item extends Component<Item> {}
 
 export class AttemptToPickupItem extends Component<AttemptToPickupItem> {
-  entity!: Entity;
   item!: Entity;
 
   static schema = {
-    entity: { type: Types.Ref },
     item: { type: Types.Ref },
   };
 }
 
 export class Inventory extends Component<Inventory> {
-  items!: Entity[];
+  items: Entity[] = [];
 
   static schema = {
     owner: { type: Types.Ref },

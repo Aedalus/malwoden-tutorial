@@ -1,6 +1,6 @@
 import { World, System } from "ecsy";
 import { Terminal, Color, GUI, Glyph, CharCode } from "malwoden";
-import { Game } from "../app";
+import { Game, GameState } from "../app";
 import * as Components from "../components";
 import { TileType } from "../game-map";
 
@@ -88,7 +88,7 @@ export class RenderSystem extends System {
     return container;
   }
 
-  execute() {
+  renderWorld() {
     const { results } = this.queries.renderables;
 
     this.game.terminal.clear();
@@ -176,5 +176,31 @@ export class RenderSystem extends System {
     }
 
     this.game.terminal.render();
+  }
+
+  renderInventory() {
+    this.game.terminal.clear();
+
+    this.game.terminal.writeAt({ x: 1, y: 1 }, "Inventory!");
+
+    const inventory = this.game.player.getComponent(Components.Inventory);
+    if (!inventory) throw new Error("Player does not have inventory!");
+
+    for (let i = 0; i < inventory.items.length; i++) {
+      const name = inventory.items[i].getComponent(Components.Name);
+      if (!name) continue;
+
+      this.game.terminal.writeAt({ x: 1, y: 3 + i }, name.name);
+    }
+
+    this.game.terminal.render();
+  }
+
+  execute(): void {
+    if (this.game.gameState === GameState.INVENTORY) {
+      this.renderInventory();
+    } else {
+      this.renderWorld();
+    }
   }
 }

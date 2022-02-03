@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 10
 ---
 
 # 10 - Inventory
@@ -16,18 +16,16 @@ export class Item extends Component<Item> {}
 // Like 'AttemptToMelee', tracks the intent of a player/entity
 // A system can allow us to pick this up
 export class AttemptToPickupItem extends Component<AttemptToPickupItem> {
-  entity!: Entity;
   item!: Entity;
 
   static schema = {
-    entity: { type: Types.Ref },
     item: { type: Types.Ref },
   };
 }
 
-// Can attach to a player/monster
+// Can attach to a player/monster, even chests down the line!
 export class Inventory extends Component<Inventory> {
-  items!: Entity[];
+  items: Entity[] = [];
 
   static schema = {
     owner: { type: Types.Ref },
@@ -330,3 +328,314 @@ Items are now spawning in our rooms, but we still don't have an easy way to pick
 - Create a system that monitors `AttemptToPickupItem`, and transfers an item from the map to an inventory.
 
 
+Let's start with giving the player an inventory components.
+
+```ts
+// src/
+//...
+
+  const player = world
+    .createEntity()
+    .addComponent(Components.Position, startRoom.center())
+    .addComponent(Components.Player)
+    .addComponent(Components.Renderable, {
+      glyph: new Terminal.Glyph("@", Color.Yellow),
+      zIndex: 10,
+    })
+    .addComponent(Components.BlocksTile)
+    .addComponent(Components.Viewshed, { range: 7 })
+    .addComponent(Components.CombatStats, {
+      hp: 30,
+      maxHp: 30,
+      power: 5,
+      defense: 2,
+    })
+    .addComponent(Components.Inventory) // New inventory component
+    .addComponent(Components.Name, { name: "Player" });
+```
+
+Next, let's go back to `app.ts`, and listen for if the player wants to pick up an item. We'll use the `p` key for this for now. Remember we want to add as little logic as we can for this part, so let's add a helper function in our `src/actions.ts` file.
+
+```ts
+// src/actions.ts
+//...
+
+export function inflictDamage(e: Entity, amount: number) {
+  if (!e.hasComponent(Components.IncomingDamage)) {
+    e.addComponent(Components.IncomingDamage, { amount });
+  } else {
+    const incDamage = e.getMutableComponent(Components.IncomingDamage)!;
+    incDamage.amount += amount;
+  }
+}
+
+export function attemptToPickUp(game: Game, entity: Entity, position: Vector2) {
+  const items = game.map
+    .getTileContent(position)
+    .filter((e) => e.hasComponent(Components.Item));
+
+  const targetItem = items[0];
+  if (targetItem === undefined) {
+    game.log.addMessage("No item to pick up!");
+  } else {
+    entity.addComponent(Components.AttemptToPickupItem, { item: targetItem });
+  }
+}
+
+```
+
+Then in our `app.ts`, we add the following.
+
+```ts
+// src/app.ts
+//...
+    ctx.onAnyUp((keyEvent) => {
+      if (this.gameState !== GameState.AWAITING_INPUT) return;
+
+      switch (keyEvent.key) {
+        case Input.KeyCode.LeftArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: -1, y: 0 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.RightArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 1, y: 0 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.UpArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 0, y: -1 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.DownArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 0, y: 1 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.P: { // On pickup
+          Actions.attemptToPickUp(
+            this,
+            this.player,
+            this.player.getComponent(Components.Position)!
+          );
+          break;
+        }
+      }
+    });
+```
+
+Finally we need to make a new inventory system.
+
+```ts
+// src/systems/inventory-system.ts
+import { World, System } from "ecsy";
+import { Game } from "../app";
+import * as Components from "../components";
+
+export class InventorySystem extends System {
+  game: Game;
+
+  constructor(world: World, game: Game) {
+    super(world, game);
+    this.game = game;
+  }
+
+  static queries = {
+    wantsToPickup: {
+      components: [Components.AttemptToPickupItem],
+    },
+  };
+
+  execute() {
+    const { results } = this.queries.wantsToPickup;
+
+    // All entities that want to pick up something
+    for (const e of results) {
+      const wantsToPickup = e.getComponent(Components.AttemptToPickupItem)!;
+      const inventory = e.getComponent(Components.Inventory);
+      const entityName = e.getComponent(Components.Name)?.name || "Someone";
+      const item = wantsToPickup.item;
+      const itemName = item.getComponent(Components.Name)?.name || "something";
+
+      if (inventory) {
+        inventory.items.push(wantsToPickup.item);
+        item.removeComponent(Components.Position); // No longer on the map!
+        this.game.log.addMessage(`${entityName} picked up ${itemName}`);
+      }
+
+      e.removeComponent(Components.AttemptToPickupItem);
+    }
+  }
+}
+
+```
+
+And of course we need to register our new system.
+
+```ts
+// src/systems/index.ts
+export { RenderSystem } from "./render";
+export { VisibilitySystem } from "./visibility";
+export { EnemyAISystem } from "./enemy-ai";
+export { MapIndexing } from "./map-indexing";
+export { MeleeCombat } from "./melee-combat";
+export { DamageSystem } from "./damage-system";
+export { DeathSystem } from "./death-system";
+export { InventorySystem } from "./inventory-system";
+```
+
+```ts
+// src/app.ts
+//...
+
+      // run it before map index or render!
+      .registerSystem(Systems.VisibilitySystem, this)
+      .registerSystem(Systems.EnemyAISystem, this)
+      .registerSystem(Systems.MeleeCombat, this)
+      .registerSystem(Systems.DamageSystem, this)
+      .registerSystem(Systems.DeathSystem, this)
+      .registerSystem(Systems.InventorySystem, this)
+      .registerSystem(Systems.MapIndexing, this)
+      .registerSystem(Systems.RenderSystem, this);
+  }
+```
+
+If we finally run our game, we can see ourselves
+![item-pickup](/img/chapter-10/pick-up-item.gif)
+
+## Inventory Screen
+
+We're now able to pick up an item, but we're not yet able to see our inventory, let alone use a bandage. If we stop and think though, an inventory screen isn't quite like any of the GameModes we expect. It's definitely not an `ENEMY_TURN`, or even a `PLAYER_TURN`. It's close to `AWAITING_INPUT`, but it's different than just how we normally wait for player input. Let's start by creating a new `INVENTORY` game state. Depending on what the player chooses from the inventory, we can either transition to `PLAYER_STATE`, or back to `AWAITING_INPUT` if they just cancel out. 
+
+We also need to add a way to enter the inventory state. Let's choose `i` to be our inventory button.
+
+```ts
+// src/app.ts
+//...
+
+export enum GameState {
+  INIT,
+  PLAYER_TURN,
+  ENEMY_TURN,
+  AWAITING_INPUT,
+  INVENTORY
+}
+
+// ...
+    ctx.onAnyUp((keyEvent) => {
+
+      if (
+        this.gameState !== GameState.AWAITING_INPUT &&
+        this.gameState !== GameState.INVENTORY
+      ) {
+        return;
+      }
+
+      switch (keyEvent.key) {
+        case Input.KeyCode.LeftArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: -1, y: 0 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.RightArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 1, y: 0 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.UpArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 0, y: -1 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.DownArrow: {
+          Actions.tryMoveEntity(this, this.player, { x: 0, y: 1 });
+          this.gameState = GameState.PLAYER_TURN;
+          break;
+        }
+        case Input.KeyCode.P: {
+          Actions.attemptToPickUp(
+            this,
+            this.player,
+            this.player.getComponent(Components.Position)!
+          );
+          break;
+        }
+        case Input.KeyCode.I: {
+          if (this.gameState === GameState.AWAITING_INPUT) {
+            this.gameState = GameState.INVENTORY;
+          } else if (this.gameState === GameState.INVENTORY) {
+            this.gameState = GameState.AWAITING_INPUT;
+          }
+        }
+      }
+    });
+```
+
+Now let's change our render system to support rendering an inventory. First, we're going to move all of our existing code in `execute()` into a `renderWorld()` function. Then we'll use the newly cleared out `execute` function to decide whether we want to render the world, or the player's inventory.
+
+```ts
+// src/systems/render.ts
+//...
+
+  // new method to render the world
+  renderWorld() {
+    // move EVERYTHING from our old execute() method here
+  }
+
+  // new method to render the inventory
+  renderInventory() {
+    this.game.terminal.clear();
+
+    this.game.terminal.writeAt({ x: 1, y: 1 }, "Inventory!");
+
+    this.game.terminal.render();
+  }
+
+  // Decide which one we want based on the game state
+  execute(): void {
+    if (this.game.gameState === GameState.INVENTORY) {
+      this.renderInventory();
+    } else {
+      this.renderWorld();
+    }
+  }
+}
+```
+
+If we try running the game now, we can toggle between the overworld and the inventory screen by pressing `i`!
+
+![inventory render](/img/chapter-10/inventory-render.gif)
+
+Now we're still not listing any of the items that the player picked up. For now we'll go with a bit of a naive implementation, and just iterate throught the player's inventory displaying each item in a line.
+
+```ts
+// src/systems/render.ts
+//...
+
+  renderInventory() {
+    this.game.terminal.clear();
+
+    this.game.terminal.writeAt({ x: 1, y: 1 }, "Inventory!");
+
+    const inventory = this.game.player.getComponent(Components.Inventory);
+    if (!inventory) throw new Error("Player does not have inventory!");
+
+    for (let i = 0; i < inventory.items.length; i++) {
+      const name = inventory.items[i].getComponent(Components.Name);
+      if (!name) continue;
+
+      this.game.terminal.writeAt({ x: 1, y: 3 + i }, name.name);
+    }
+
+    this.game.terminal.render();
+  }
+```
+
+If we try and run the game, we're now able to pick up and see items in our inventory.
+
+![inventory render](/img/chapter-10/inventory-with-items.gif)
+
+We've done a lot in this chapter, but we've got the basics for an inventory system now. In the next chapter, we'll look at starting to be able to use the bandages we collect, and make items with different effects.
+
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-10)

@@ -1,4 +1,4 @@
-import { Terminal, Color, Input, Rand } from "malwoden";
+import { Terminal, Input } from "malwoden";
 import { World, Entity } from "ecsy";
 import * as Components from "./components";
 import * as Systems from "./systems";
@@ -15,6 +15,7 @@ export enum GameState {
   PLAYER_TURN,
   ENEMY_TURN,
   AWAITING_INPUT,
+  INVENTORY,
 }
 
 export class Game {
@@ -61,7 +62,11 @@ export class Game {
     this.input.setContext(ctx);
 
     ctx.onAnyUp((keyEvent) => {
-      if (this.gameState !== GameState.AWAITING_INPUT) return;
+      if (
+        this.gameState !== GameState.AWAITING_INPUT &&
+        this.gameState !== GameState.INVENTORY
+      )
+        return;
 
       switch (keyEvent.key) {
         case Input.KeyCode.LeftArrow: {
@@ -83,6 +88,21 @@ export class Game {
           Actions.tryMoveEntity(this, this.player, { x: 0, y: 1 });
           this.gameState = GameState.PLAYER_TURN;
           break;
+        }
+        case Input.KeyCode.P: {
+          Actions.attemptToPickUp(
+            this,
+            this.player,
+            this.player.getComponent(Components.Position)!
+          );
+          break;
+        }
+        case Input.KeyCode.I: {
+          if (this.gameState === GameState.AWAITING_INPUT) {
+            this.gameState = GameState.INVENTORY;
+          } else if (this.gameState === GameState.INVENTORY) {
+            this.gameState = GameState.AWAITING_INPUT;
+          }
         }
       }
     });
@@ -108,6 +128,7 @@ export class Game {
       .registerSystem(Systems.MeleeCombat, this)
       .registerSystem(Systems.DamageSystem, this)
       .registerSystem(Systems.DeathSystem, this)
+      .registerSystem(Systems.InventorySystem, this)
       .registerSystem(Systems.MapIndexing, this)
       .registerSystem(Systems.RenderSystem, this);
   }

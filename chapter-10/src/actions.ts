@@ -49,3 +49,16 @@ export function inflictDamage(e: Entity, amount: number) {
     incDamage.amount += amount;
   }
 }
+
+export function attemptToPickUp(game: Game, entity: Entity, position: Vector2) {
+  const items = game.map
+    .getTileContent(position)
+    .filter((e) => e.hasComponent(Components.Item));
+
+  const targetItem = items[0];
+  if (targetItem === undefined) {
+    game.log.addMessage("No item to pick up!");
+  } else {
+    entity.addComponent(Components.AttemptToPickupItem, { item: targetItem });
+  }
+}
