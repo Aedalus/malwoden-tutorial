@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 9
 ---
 
 # 9 - UI
@@ -516,7 +516,7 @@ export enum GameState {
     } else if (this.gameState === GameState.PLAYER_TURN) {
       this.gameState = GameState.ENEMY_TURN;
     } else if (this.gameState === GameState.ENEMY_TURN) {
-      this.gameState = GameState.PLAYER_TURN;
+      this.gameState = GameState.AWAITING_INPUT;
     }
   }
 
@@ -587,10 +587,16 @@ export class RenderSystem extends System {
   }
 
   // Move these here from the top of the `Execute` function.
-  // This ensures our GUI is the last thing drawn, so the map doesn't
-  // draw over the label.
+  // This ensures our GUI is the last thing drawn
   this.gui.cascadeUpdate();
   this.gui.cascadeDraw();
+
+  // Move the logs after for now, so they draw on top of the UI
+  const logs = this.game.log.getLastMessages(5);
+  for (let i = 0; i < logs.length; i++) {
+    const msg = logs[i];
+    this.game.terminal.writeAt({ x: 1, y: 44 + i }, msg);
+  }
 
   this.game.terminal.render();
 

@@ -1,10 +1,11 @@
-import { Terminal, Color, Input, Rand } from "malwoden";
+import { Terminal, Input } from "malwoden";
 import { World, Entity } from "ecsy";
 import * as Components from "./components";
 import * as Systems from "./systems";
 import * as Actions from "./actions";
 import { GameMap } from "./game-map";
 import { GameLog } from "./game-log";
+import { generateLevel } from "./level-gen";
 
 const MAP_WIDTH = 80;
 const MAP_HEIGHT = 43;
@@ -14,6 +15,7 @@ export enum GameState {
   PLAYER_TURN,
   ENEMY_TURN,
   AWAITING_INPUT,
+  INVENTORY,
 }
 
 export class Game {
@@ -24,14 +26,19 @@ export class Game {
   world = new World();
   player: Entity;
   gameState = GameState.INIT;
-  map = GameMap.GenMapRoomsAndCorridors(MAP_WIDTH, MAP_HEIGHT);
+  map: GameMap;
   log = new GameLog();
 
   constructor() {
     this.registerComponents();
     this.registerPlayerInput();
-    const { player } = this.initWorld();
+    const { player, map } = generateLevel({
+      world: this.world,
+      width: MAP_WIDTH,
+      height: MAP_HEIGHT,
+    });
     this.player = player;
+    this.map = map;
 
     this.log.addMessage("Game Start!");
   }
@@ -55,7 +62,11 @@ export class Game {
     this.input.setContext(ctx);
 
     ctx.onAnyUp((keyEvent) => {
-      if (this.gameState !== GameState.AWAITING_INPUT) return;
+      if (
+        this.gameState !== GameState.AWAITING_INPUT &&
+        this.gameState !== GameState.INVENTORY
+      )
+        return;
 
       switch (keyEvent.key) {
         case Input.KeyCode.LeftArrow: {
@@ -78,6 +89,21 @@ export class Game {
           this.gameState = GameState.PLAYER_TURN;
           break;
         }
+        case Input.KeyCode.P: {
+          Actions.attemptToPickUp(
+            this,
+            this.player,
+            this.player.getComponent(Components.Position)!
+          );
+          break;
+        }
+        case Input.KeyCode.I: {
+          if (this.gameState === GameState.AWAITING_INPUT) {
+            this.gameState = GameState.INVENTORY;
+          } else if (this.gameState === GameState.INVENTORY) {
+            this.gameState = GameState.AWAITING_INPUT;
+          }
+        }
       }
     });
   }
@@ -94,69 +120,17 @@ export class Game {
       .registerComponent(Components.AttemptToMelee)
       .registerComponent(Components.IncomingDamage)
       .registerComponent(Components.Name)
+      .registerComponent(Components.Item)
+      .registerComponent(Components.AttemptToPickupItem)
+      .registerComponent(Components.Inventory)
       .registerSystem(Systems.VisibilitySystem, this)
       .registerSystem(Systems.EnemyAISystem, this)
       .registerSystem(Systems.MeleeCombat, this)
       .registerSystem(Systems.DamageSystem, this)
       .registerSystem(Systems.DeathSystem, this)
+      .registerSystem(Systems.InventorySystem, this)
       .registerSystem(Systems.MapIndexing, this)
       .registerSystem(Systems.RenderSystem, this);
-  }
-
-  initWorld(): { player: Entity } {
-    const startRoom = this.map.rooms[0];
-
-    const player = this.world
-      .createEntity()
-      .addComponent(Components.Position, startRoom.center())
-      .addComponent(Components.Player)
-      .addComponent(Components.Renderable, {
-        glyph: new Terminal.Glyph("@", Color.Yellow),
-      })
-      .addComponent(Components.BlocksTile)
-      .addComponent(Components.Viewshed, { range: 7 })
-      .addComponent(Components.CombatStats, {
-        hp: 30,
-        maxHp: 30,
-        power: 5,
-        defense: 2,
-      })
-      .addComponent(Components.Name, { name: "Player" });
-
-    const rng = new Rand.AleaRNG();
-
-    // Create monsters
-    // Skip the first room with the player
-    for (let i = 1; i < this.map.rooms.length; i++) {
-      const room = this.map.rooms[i];
-
-      const e = this.world
-        .createEntity()
-        .addComponent(Components.Enemy)
-        .addComponent(Components.Position, room.center())
-        .addComponent(Components.BlocksTile)
-        .addComponent(Components.Viewshed, { range: 5 })
-        .addComponent(Components.CombatStats, {
-          hp: 10,
-          maxHp: 10,
-          power: 5,
-          defense: 2,
-        });
-
-      const creatureType = rng.nextInt(0, 100);
-      const zombieGlyph = new Terminal.Glyph("Z", Color.Red);
-      const raiderGlyph = new Terminal.Glyph("R", Color.Red);
-
-      if (creatureType < 50) {
-        e.addComponent(Components.Renderable, { glyph: zombieGlyph });
-        e.addComponent(Components.Name, { name: "Zombie" });
-      } else {
-        e.addComponent(Components.Renderable, { glyph: raiderGlyph });
-        e.addComponent(Components.Name, { name: "Raider" });
-      }
-    }
-
-    return { player };
   }
 
   tick(delta: number, time: number) {

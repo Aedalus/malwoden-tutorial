@@ -1,6 +1,6 @@
 import { World, System } from "ecsy";
 import { Terminal, Color, GUI, Glyph, CharCode } from "malwoden";
-import { Game } from "../app";
+import { Game, GameState } from "../app";
 import * as Components from "../components";
 import { TileType } from "../game-map";
 
@@ -88,7 +88,7 @@ export class RenderSystem extends System {
     return container;
   }
 
-  execute() {
+  renderWorld() {
     const { results } = this.queries.renderables;
 
     this.game.terminal.clear();
@@ -122,7 +122,13 @@ export class RenderSystem extends System {
       }
     }
 
-    for (const e of results) {
+    const zIndexSort = results.sort((e1, e2) => {
+      const e1Render = e1.getComponent(Components.Renderable)!;
+      const e2Render = e2.getComponent(Components.Renderable)!;
+      return e1Render.zIndex - e2Render.zIndex;
+    });
+
+    for (const e of zIndexSort) {
       const p = e.getComponent(Components.Position)!;
       const r = e.getComponent(Components.Renderable)!;
 
@@ -137,12 +143,15 @@ export class RenderSystem extends System {
     const tilePos = this.game.terminal.windowToTilePoint(mousePos);
     const entities = this.game.map.getTileContent(tilePos);
     let labelName = "";
+    let highestZIndex = 0;
 
     for (const e of entities) {
       const nameComponent = e.getComponent(Components.Name);
-      if (nameComponent) {
+      const render = e.getComponent(Components.Renderable)!;
+
+      if (nameComponent && render.zIndex > highestZIndex) {
+        highestZIndex = render.zIndex;
         labelName = nameComponent.name;
-        break;
       }
     }
 
@@ -167,5 +176,31 @@ export class RenderSystem extends System {
     }
 
     this.game.terminal.render();
+  }
+
+  renderInventory() {
+    this.game.terminal.clear();
+
+    this.game.terminal.writeAt({ x: 1, y: 1 }, "Inventory!");
+
+    const inventory = this.game.player.getComponent(Components.Inventory);
+    if (!inventory) throw new Error("Player does not have inventory!");
+
+    for (let i = 0; i < inventory.items.length; i++) {
+      const name = inventory.items[i].getComponent(Components.Name);
+      if (!name) continue;
+
+      this.game.terminal.writeAt({ x: 1, y: 3 + i }, name.name);
+    }
+
+    this.game.terminal.render();
+  }
+
+  execute(): void {
+    if (this.game.gameState === GameState.INVENTORY) {
+      this.renderInventory();
+    } else {
+      this.renderWorld();
+    }
   }
 }
