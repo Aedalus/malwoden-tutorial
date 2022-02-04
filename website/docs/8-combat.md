@@ -494,4 +494,4 @@ Again, it might not be immediately clear why making these changes would be the f
 
 This was a long chapter, but we're really starting to see the skeleton of a game come together. In the next chapter, we'll look at starting to add a basic interface alongside the game screen.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-8)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-08)

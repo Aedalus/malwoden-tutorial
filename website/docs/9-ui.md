@@ -607,4 +607,4 @@ few chapters as we look to add a basic inventory.
 
 ![labels](/img/chapter-9/labels.gif)
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-9)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-09)

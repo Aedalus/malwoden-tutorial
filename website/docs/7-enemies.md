@@ -546,4 +546,4 @@ Now the player and enemies are using the same logic to move, which helps keep ou
 
 This was a long chapter, but we got a lot done. Now we have enemies, some basic AI, and even made our map system better and easier to build on. Out new `BlocksTile` component will come in handy to even make other interactible entities in the future, like trees or doors. In the next chapter we'll start to look at some basic combat.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-7)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-07)

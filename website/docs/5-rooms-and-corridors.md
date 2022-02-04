@@ -167,4 +167,4 @@ Let's try to update the player creation to make sure they always start in a room
 That's all for this chapter! Later on we'll try to circle back and look at some other nice ways we can generate maps. In the next chapter, we'll start to look at Field of View so we can't see the whole dungeon from the start.
 
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-5)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-05)

@@ -354,4 +354,4 @@ If you followed along, you should now see parts of the map you already explored.
 
 That's all we'll do with FoV for now, but we'll use these same Viewsheds again to make monsters start to chase players later on.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-6)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-06)

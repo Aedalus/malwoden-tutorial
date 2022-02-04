@@ -199,4 +199,4 @@ Once we're ready, we should be able to try it out and no longer be able to walk 
 
 ![Blocked](/img/chapter-4/blocked.gif)
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-4)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-04)

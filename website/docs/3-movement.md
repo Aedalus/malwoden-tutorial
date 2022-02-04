@@ -131,4 +131,4 @@ If you set everything up properly, you should be able to move the player around!
 
 You can find the source code for this chapter here.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-3)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-03)

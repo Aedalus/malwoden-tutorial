@@ -94,4 +94,4 @@ If you refresh the page, you should see an image like so!
 
 That's it for the first chapter! In the next chapter we'll look at starting to make a player character we can move around the screen.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-1)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-01)

@@ -300,4 +300,5 @@ If we run the game once more, we'll finally see a player!
 
 While this chapter was pretty long, we set up a lot of the groundwork that will let us move fast from here out. In the next chapter we'll work to add some simple movement to the player.
 
-[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-2)
+[You can find the source code for this chapter here.](https://github.com/Aedalus/malwoden-tutorial/tree/main/chapter-02)
+
