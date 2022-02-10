@@ -4,7 +4,7 @@ sidebar_position: 9
 
 # 9 - UI
 
-We've got a basic game world, but we need to maing information about this world available to the player. For now, let's start by shrinking the existing generated map to give us a bit of room.
+We've got a basic game world, but we need to make information about this world available to the player. For now, let's start by shrinking the existing generated map to give us a bit of room for a UI.
 
 ```ts
 // src/app.ts

@@ -75,7 +75,7 @@ function tryMoveEntity(e: Entity, delta: Vector2) {
 }
 ```
 
-We're not going to do anything too complex here. We expect an `Entity` and a `Vector2` representing the delta to be passed in. The delta is the difference between where the entity is, and where we want it to be. For instance, if the Entity's position is at `(1,1)`, and we want to move it right, the delta would be `(1, 0)`. If we wanted to move it left, `(-1,0)`. If we wanted to move it up, `(-1, 0)`. Remember the y axix has 0 at the top!
+We're not going to do anything too complex here. We expect an `Entity` and a `Vector2` representing the delta to be passed in. The delta is the difference between where the entity is, and where we want it to be. For instance, if the Entity's position is at `(1,1)`, and we want to move it right, the delta would be `(1, 0)`. If we wanted to move it left, `(-1,0)`. If we wanted to move it up, `(-1, 0)`. Remember the y axis has 0 at the top!
 
 From there we get the position component, and throw a warning if the entity didn't have the component. Then, we add the delta's x and y to the current position to get the destination. For now we won't be doing any kind of checking to see if the player runs off the screen, or into a wall. Now to wire it up to the keyboard.
 

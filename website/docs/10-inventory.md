@@ -186,12 +186,12 @@ export class Game {
 
 If we run the game again, we should see it working just like before. Now let's edit our `level-gen.ts` file to add some new `Bandage` objects to our rooms. They won't do anything for now, but we'll be able to pick them up and use them by the end of the chapter.
 
-First lets add a new function to our level-gen for now to create a potion, given an ECSY World and a position.
+First lets add a new function to our level-gen for now to create a bandage, given an ECSY World and a position.
 
 ```ts
 // src/level-gen.ts
 // ...
-function spawnPotion(world: World, position: Vector2) {
+function spawnBandage(world: World, position: Vector2) {
   world
     .createEntity()
     .addComponent(Components.Item)
@@ -203,7 +203,7 @@ function spawnPotion(world: World, position: Vector2) {
 }
 ```
 
-Then we'll update the `generateLevel` function a tiny bit. For each room in the map, we will have a chance of spawning health potions.
+Then we'll update the `generateLevel` function a tiny bit. For each room in the map, we will have a chance of spawning bandages.
 
 ```ts
 // src/level-gen.ts
@@ -213,11 +213,11 @@ Then we'll update the `generateLevel` function a tiny bit. For each room in the 
   for (let i = 1; i < map.rooms.length; i++) {
     const room = map.rooms[i];
 
-    // 50% of spawning a potion
+    // 50% of spawning a bandage
     if (rng.next() < 0.5) {
       const randX = rng.nextInt(room.v1.x, room.v2.x + 1);
       const randY = rng.nextInt(room.v1.y, room.v2.y + 1);
-      spawnPotion(world, { x: randX, y: randY });
+      spawnBandage(world, { x: randX, y: randY });
     }
 
 ```
@@ -324,7 +324,7 @@ If we render the game now, the player should always be able to step onto items, 
 Items are now spawning in our rooms, but we still don't have an easy way to pick them up! High level, we still need to 
 
 - Add an `Inventory` component to at least the player for now. Perhaps enemies later!
-- Listen to a keypress from the player. If they want to pick up an item, attach a `AttemptToPickupItem` component
+- Listen to a key press from the player. If they want to pick up an item, attach a `AttemptToPickupItem` component
 - Create a system that monitors `AttemptToPickupItem`, and transfers an item from the map to an inventory.
 
 
@@ -607,7 +607,7 @@ If we try running the game now, we can toggle between the overworld and the inve
 
 ![inventory render](/img/chapter-10/inventory-render.gif)
 
-Now we're still not listing any of the items that the player picked up. For now we'll go with a bit of a naive implementation, and just iterate throught the player's inventory displaying each item in a line.
+Now we're still not listing any of the items that the player picked up. For now we'll go with a bit of a naive implementation, and just iterate through the player's inventory displaying each item in a line.
 
 ```ts
 // src/systems/render.ts
