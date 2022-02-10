@@ -116,7 +116,7 @@ export class VisibilitySystem extends System {
   }
 ```
 
-Now the above can be a little bit dense to read through initially. We're creating a new `FOV.PreciseShadowcasting` object from malwoden, and passing in options. We're choosing a topology of eight, which means diagonals are treated as the same 'distance' as orthoginal (left/right/up/down). So if an entity has a vision range of two, it can see two diagonally as well as two to the left. In practice, this means the field of view will be more square-ish than diamond shaped, which I personally prefer.
+Now the above can be a little bit dense to read through initially. We're creating a new `FOV.PreciseShadowcasting` object from malwoden, and passing in options. We're choosing a topology of eight, which means diagonals are treated as the same 'distance' as orthogonal (left/right/up/down). So if an entity has a vision range of two, it can see two diagonally as well as two to the left. In practice, this means the field of view will be more square-ish than diamond shaped, which I personally prefer.
 
 The `lightPasses` option accepts a callback that takes a `Vector2`. The callback should return true if light can pass through that position. In our case, we check the map's tiles for that position, and then return true if it's a Floor for now.
 

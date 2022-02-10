@@ -22,7 +22,7 @@ This tutorial is also based off of an [existing tutorial in Rust created by Herb
 
 - `git` - Ideally either a CLI or a gui client, with basic knowledge of either.
 - `node/npm` - We will use the `npm` command to install packages and start the site. This comes bundled with [Node](https://nodejs.org/en/). If uncertain of which node version to download, go with the latest LTS release. This tutorial was written with v14.17.x for reference.
-- `Code Editor` - You'll want some way to edit typsecript files, preferably with code hinting/auto-completion. Just about any will do, though if you're looking for a free one to start with I recommend [VSCode](https://code.visualstudio.com/).
+- `Code Editor` - You'll want some way to edit typescript files, preferably with code hinting/auto-completion. Just about any will do, though if you're looking for a free one to start with I recommend [VSCode](https://code.visualstudio.com/).
 
 ### Do I need to know Javascript/Typescript?
 This tutorial assumes a basic level of Javascript/Typescript familiarity from the start. If you're familiar with other programming languages like python, java, or C# you'll likely be able to follow along easily, though some of the syntax might be a bit new.

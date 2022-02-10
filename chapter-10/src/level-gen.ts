@@ -46,11 +46,11 @@ export function generateLevel(config: GenerateLevelConfig): LevelData {
   for (let i = 1; i < map.rooms.length; i++) {
     const room = map.rooms[i];
 
-    // 50% of spawning a potion
+    // 50% of spawning a bandage
     if (rng.next() < 0.5) {
       const randX = rng.nextInt(room.v1.x, room.v2.x + 1);
       const randY = rng.nextInt(room.v1.y, room.v2.y + 1);
-      spawnPotion(world, { x: randX, y: randY });
+      spawnBandage(world, { x: randX, y: randY });
     }
 
     const e = world
@@ -85,7 +85,7 @@ export function generateLevel(config: GenerateLevelConfig): LevelData {
   };
 }
 
-function spawnPotion(world: World, position: Vector2) {
+function spawnBandage(world: World, position: Vector2) {
   world
     .createEntity()
     .addComponent(Components.Item)

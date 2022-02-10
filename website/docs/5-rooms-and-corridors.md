@@ -36,7 +36,7 @@ export class GameMap {
   }
 ```
 
-We'll also create a small handfull of helper methods on our `GameMap` class to help here shortly. None of these should be too complicated, but will make our next method more concise.
+We'll also create a small handful of helper methods on our `GameMap` class to help here shortly. None of these should be too complicated, but will make our next method more concise.
 
 ```ts
 // src/game-map.ts

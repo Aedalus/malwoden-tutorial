@@ -101,6 +101,32 @@ export class Inventory extends Component<Inventory> {
   items: Entity[] = [];
 
   static schema = {
-    owner: { type: Types.Ref },
+    items: { type: Types.Ref },
+  };
+}
+
+export class IncomingHealing extends Component<IncomingHealing> {
+  amount = 0;
+
+  static schema = {
+    amount: { type: Types.Number },
+  };
+}
+
+export class Consumable extends Component<Consumable> {
+  verb = "ate";
+  healing = 0;
+
+  static schema = {
+    verb: { type: Types.String },
+    healing: { type: Types.Number },
+  };
+}
+
+export class Description extends Component<Description> {
+  text = "";
+
+  static schema = {
+    text: { type: Types.String },
   };
 }

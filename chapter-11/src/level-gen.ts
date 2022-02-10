@@ -41,7 +41,7 @@ export function generateLevel(config: GenerateLevelConfig): LevelData {
 
   const playerInventory = player.getComponent(Components.Inventory)!;
   for (let i = 0; i < 3; i++) {
-    playerInventory.items.push(getPotion(world));
+    playerInventory.items.push(getBandage(world));
   }
 
   const rng = new Rand.AleaRNG();
@@ -51,12 +51,12 @@ export function generateLevel(config: GenerateLevelConfig): LevelData {
   for (let i = 1; i < map.rooms.length; i++) {
     const room = map.rooms[i];
 
-    // 50% of spawning a potion
+    // 50% of spawning a bandage
     if (rng.next() < 0.5) {
       const randX = rng.nextInt(room.v1.x, room.v2.x + 1);
       const randY = rng.nextInt(room.v1.y, room.v2.y + 1);
-      const potion = getPotion(world);
-      placeEntity(potion, { x: randX, y: randY });
+      const bandage = getBandage(world);
+      placeEntity(bandage, { x: randX, y: randY });
     }
 
     const e = world
@@ -95,12 +95,19 @@ function placeEntity(entity: Entity, position: Vector2) {
   entity.addComponent(Components.Position, position);
 }
 
-function getPotion(world: World): Entity {
+function getBandage(world: World): Entity {
   return world
     .createEntity()
     .addComponent(Components.Item)
     .addComponent(Components.Name, { name: "Bandage" })
     .addComponent(Components.Renderable, {
       glyph: new Glyph("b", Color.Orange),
+    })
+    .addComponent(Components.Consumable, {
+      verb: "used",
+      healing: 5,
+    })
+    .addComponent(Components.Description, {
+      text: "A bit worn, but will still heal",
     });
 }

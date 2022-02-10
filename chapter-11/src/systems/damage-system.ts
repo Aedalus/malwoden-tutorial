@@ -14,16 +14,32 @@ export class DamageSystem extends System {
     damaged: {
       components: [Components.CombatStats, Components.IncomingDamage],
     },
+    healed: {
+      components: [Components.CombatStats, Components.IncomingHealing],
+    },
   };
 
   execute() {
-    const { results } = this.queries.damaged;
+    const damaged = this.queries.damaged.results;
+    const healed = this.queries.healed.results;
 
-    for (const e of results) {
+    // Calculate healing first
+    for (const e of healed) {
+      const combatStats = e.getMutableComponent(Components.CombatStats)!;
+      const incHealing = e.getMutableComponent(Components.IncomingHealing)!;
+      combatStats.hp = Math.min(
+        combatStats.hp + incHealing.amount,
+        combatStats.maxHp
+      );
+      e.removeComponent(Components.IncomingHealing);
+    }
+
+    // Then calculate damage
+    for (const e of damaged) {
       const combatStats = e.getMutableComponent(Components.CombatStats)!;
       const incDamage = e.getMutableComponent(Components.IncomingDamage)!;
       combatStats.hp -= incDamage.amount;
-      incDamage.amount = 0; // for now, just set incoming damage back to zero
+      e.removeComponent(Components.IncomingDamage);
     }
   }
 }

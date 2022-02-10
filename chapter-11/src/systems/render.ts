@@ -179,6 +179,8 @@ export class RenderSystem extends System {
   }
 
   renderInventory() {
+    const selectedIndex = this.game.keysInventory.getSelectedIndex();
+
     this.game.terminal.clear();
 
     this.game.terminal.writeAt({ x: 1, y: 1 }, "Inventory!");
@@ -187,10 +189,28 @@ export class RenderSystem extends System {
     if (!inventory) throw new Error("Player does not have inventory!");
 
     for (let i = 0; i < inventory.items.length; i++) {
+      const selected = i === selectedIndex;
       const name = inventory.items[i].getComponent(Components.Name);
-      if (!name) continue;
+      if (!name) throw new Error("Every item needs a name!");
 
-      this.game.terminal.writeAt({ x: 1, y: 3 + i }, name.name);
+      if (selected) {
+        this.game.terminal.writeAt(
+          { x: 2, y: 3 + i },
+          "* " + name.name,
+          Color.Cyan
+        );
+      } else {
+        this.game.terminal.writeAt({ x: 2, y: 3 + i }, name.name);
+      }
+    }
+
+    const selectedItem = inventory.items[selectedIndex];
+    const description = selectedItem?.getComponent(
+      Components.Description
+    )?.text;
+
+    if (description) {
+      this.game.terminal.writeAt({ x: 20, y: 3 }, description);
     }
 
     this.game.terminal.render();

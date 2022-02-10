@@ -62,3 +62,39 @@ export function attemptToPickUp(game: Game, entity: Entity, position: Vector2) {
     entity.addComponent(Components.AttemptToPickupItem, { item: targetItem });
   }
 }
+
+export function addHealing(e: Entity, amount: number) {
+  if (!e.hasComponent(Components.IncomingHealing)) {
+    e.addComponent(Components.IncomingHealing, { amount });
+  } else {
+    const incHealing = e.getMutableComponent(Components.IncomingHealing)!;
+    incHealing.amount += amount;
+  }
+}
+
+export function consumeInventoryItem(
+  game: Game,
+  consumer: Entity,
+  item: Entity
+) {
+  const consumerName =
+    consumer.getComponent(Components.Name)?.name || "Unknown Entity";
+  const itemName = item.getComponent(Components.Name)?.name || "Unknown Item";
+  const consumable = item.getComponent(Components.Consumable);
+  const inventory = consumer.getMutableComponent(Components.Inventory);
+  if (!consumable)
+    throw new Error("Can't consume an entity without consumable!");
+  if (!inventory) throw new Error("Can't use an item not in inventory!");
+
+  // log message
+  const msg = `${consumerName} ${consumable.verb} ${itemName}`;
+  game.log.addMessage(msg);
+
+  // attach effects
+  if (consumable.healing > 0) {
+    addHealing(consumer, consumable.healing);
+  }
+
+  // remove item
+  inventory.items = inventory.items.filter((x) => x.id !== item.id);
+}

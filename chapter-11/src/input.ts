@@ -42,8 +42,7 @@ export class OverworldContext extends Input.KeyboardContext {
           break;
         }
         case Input.KeyCode.I: {
-          game.gameState = GameState.INVENTORY;
-          game.input.setContext(game.keysInventory);
+          this.game.goToInventory();
         }
       }
     });
@@ -51,7 +50,9 @@ export class OverworldContext extends Input.KeyboardContext {
 }
 
 export class InventoryContext extends Input.KeyboardContext {
-  game: Game;
+  private game: Game;
+  private selectedIndex = 0;
+
   constructor(game: Game) {
     super();
     this.game = game;
@@ -60,11 +61,56 @@ export class InventoryContext extends Input.KeyboardContext {
       switch (keyEvent.key) {
         case Input.KeyCode.I:
         case Input.KeyCode.Escape: {
-          game.gameState = GameState.AWAITING_INPUT;
-          game.input.setContext(game.keysOverworld);
+          this.game.goToOverworld(true);
+          break;
+        }
+        case Input.KeyCode.DownArrow: {
+          this.nextItem();
+          break;
+        }
+        case Input.KeyCode.UpArrow: {
+          this.prevItem();
+          break;
+        }
+        case Input.KeyCode.Space: {
+          this.selectItem();
           break;
         }
       }
     });
+  }
+
+  private getPlayerInventory(): Components.Inventory {
+    return this.game.player.getComponent(Components.Inventory)!;
+  }
+
+  private nextItem() {
+    this.selectedIndex += 1;
+    const maxIndex = this.getPlayerInventory().items.length - 1;
+    if (this.selectedIndex > maxIndex) {
+      this.selectedIndex = 0;
+    }
+  }
+
+  private prevItem() {
+    this.selectedIndex -= 1;
+    const maxIndex = this.getPlayerInventory().items.length - 1;
+    if (this.selectedIndex < 0) {
+      this.selectedIndex = maxIndex;
+    }
+  }
+
+  private selectItem() {
+    const item = this.getPlayerInventory().items[this.getSelectedIndex()];
+    Actions.consumeInventoryItem(this.game, this.game.player, item);
+    this.game.goToOverworld(false);
+  }
+
+  getSelectedIndex(): number {
+    const maxIndex = this.getPlayerInventory().items.length - 1;
+    if (this.selectedIndex > maxIndex) {
+      this.selectedIndex = 0;
+    }
+    return this.selectedIndex;
   }
 }

@@ -46,6 +46,18 @@ export class Game {
     this.log.addMessage("Game Start!");
   }
 
+  goToOverworld(awaitingInput: boolean) {
+    this.gameState = awaitingInput
+      ? GameState.AWAITING_INPUT
+      : GameState.PLAYER_TURN;
+    this.input.setContext(this.keysOverworld);
+  }
+
+  goToInventory() {
+    this.gameState = GameState.INVENTORY;
+    this.input.setContext(this.keysInventory);
+  }
+
   createTerminal(): Terminal.RetroTerminal {
     const mountNode = document.getElementById("app");
     if (!mountNode) throw new Error("mountNode not defined");
@@ -74,7 +86,10 @@ export class Game {
       .registerComponent(Components.Name)
       .registerComponent(Components.Item)
       .registerComponent(Components.AttemptToPickupItem)
+      .registerComponent(Components.IncomingHealing)
+      .registerComponent(Components.Consumable)
       .registerComponent(Components.Inventory)
+      .registerComponent(Components.Description)
       .registerSystem(Systems.VisibilitySystem, this)
       .registerSystem(Systems.EnemyAISystem, this)
       .registerSystem(Systems.MeleeCombat, this)
