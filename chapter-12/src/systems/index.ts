@@ -6,3 +6,5 @@ export { MeleeCombat } from "./melee-combat";
 export { DamageSystem } from "./damage-system";
 export { DeathSystem } from "./death-system";
 export { InventorySystem } from "./inventory-system";
+export { LevelSystem } from "./level-system";
+export { WinSystem } from "./win-system";

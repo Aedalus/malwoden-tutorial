@@ -143,7 +143,7 @@ export class RenderSystem extends System {
     const tilePos = this.game.terminal.windowToTilePoint(mousePos);
     const entities = this.game.map.getTileContent(tilePos);
     let labelName = "";
-    let highestZIndex = 0;
+    let highestZIndex = -Infinity;
 
     for (const e of entities) {
       const nameComponent = e.getComponent(Components.Name);
@@ -216,9 +216,25 @@ export class RenderSystem extends System {
     this.game.terminal.render();
   }
 
+  renderWonGame() {
+    this.game.terminal.clear();
+    this.game.terminal.writeAt({ x: 35, y: 15 }, "You Won!");
+    this.game.terminal.render();
+  }
+
+  renderLostGame() {
+    this.game.terminal.clear();
+    this.game.terminal.writeAt({ x: 35, y: 15 }, "You Lost!");
+    this.game.terminal.render();
+  }
+
   execute(): void {
     if (this.game.gameState === GameState.INVENTORY) {
       this.renderInventory();
+    } else if (this.game.gameState === GameState.WON_GAME) {
+      this.renderWonGame();
+    } else if (this.game.gameState === GameState.LOST_GAME) {
+      this.renderLostGame();
     } else {
       this.renderWorld();
     }

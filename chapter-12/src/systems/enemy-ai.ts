@@ -1,4 +1,4 @@
-import { Pathfinding } from "malwoden";
+import { Calc, Pathfinding } from "malwoden";
 import { World, System } from "ecsy";
 import { Game, GameState } from "../app";
 import * as Components from "../components";
@@ -41,6 +41,7 @@ export class EnemyAISystem extends System {
         // Find the path
         const path = this.pathfinding.compute(pos, playerPos);
 
+        if (!path) console.log("no path found!");
         if (path && path[1]) {
           const nextStep = path[1];
           // next step is the player

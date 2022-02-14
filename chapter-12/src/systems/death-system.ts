@@ -1,5 +1,5 @@
 import { World, System, Entity } from "ecsy";
-import { Game } from "../app";
+import { Game, GameState } from "../app";
 import * as Components from "../components";
 
 export class DeathSystem extends System {
@@ -33,7 +33,12 @@ export class DeathSystem extends System {
       if (nameComp) {
         this.game.log.addMessage(`${nameComp.name} died!`);
       }
-      d.remove(true);
+
+      if (d.id === this.game.player.id) {
+        this.game.gameState = GameState.LOST_GAME;
+      } else {
+        d.remove(true);
+      }
     }
   }
 }

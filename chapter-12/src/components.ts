@@ -130,3 +130,7 @@ export class Description extends Component<Description> {
     text: { type: Types.String },
   };
 }
+
+export class CanDescend extends Component<CanDescend> {}
+
+export class WinOnPickup extends Component<WinOnPickup> {}

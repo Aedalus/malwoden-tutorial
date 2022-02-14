@@ -1,113 +1,97 @@
-import { Entity, World } from "ecsy";
+import { World, Entity } from "ecsy";
 import { GameMap } from "./game-map";
 import * as Components from "./components";
-import { Color, Glyph, Rand, Terminal, Vector2 } from "malwoden";
+import { Rand, Struct, Vector2 } from "malwoden";
+import * as Prefabs from "./prefabs";
 
 interface GenerateLevelConfig {
-  world: World;
   width: number;
   height: number;
+  level: number;
 }
 
 interface LevelData {
   map: GameMap;
-  player: Entity;
+  playerStart: Vector2;
 }
 
-export function generateLevel(config: GenerateLevelConfig): LevelData {
-  const { world, width, height } = config;
-  const map = GameMap.GenMapRoomsAndCorridors(width, height);
+export class LevelGenerator {
+  world: World;
+  rng = new Rand.AleaRNG();
 
-  const startRoom = map.rooms[0];
-
-  const player = world
-    .createEntity()
-    .addComponent(Components.Position, startRoom.center())
-    .addComponent(Components.Player)
-    .addComponent(Components.Renderable, {
-      glyph: new Terminal.Glyph("@", Color.Yellow),
-      zIndex: 10,
-    })
-    .addComponent(Components.BlocksTile)
-    .addComponent(Components.Viewshed, { range: 7 })
-    .addComponent(Components.CombatStats, {
-      hp: 30,
-      maxHp: 30,
-      power: 5,
-      defense: 2,
-    })
-    .addComponent(Components.Inventory)
-    .addComponent(Components.Name, { name: "Player" });
-
-  const playerInventory = player.getComponent(Components.Inventory)!;
-  for (let i = 0; i < 3; i++) {
-    playerInventory.items.push(getBandage(world));
+  constructor(world: World) {
+    this.world = world;
   }
 
-  const rng = new Rand.AleaRNG();
+  createPlayer(position: Vector2): Entity {
+    const player = Prefabs.player(this.world);
+    Prefabs.placeEntity(player, position);
 
-  // Create monsters
-  // Skip the first room with the player
-  for (let i = 1; i < map.rooms.length; i++) {
-    const room = map.rooms[i];
-
-    // 50% of spawning a bandage
-    if (rng.next() < 0.5) {
-      const randX = rng.nextInt(room.v1.x, room.v2.x + 1);
-      const randY = rng.nextInt(room.v1.y, room.v2.y + 1);
-      const bandage = getBandage(world);
-      placeEntity(bandage, { x: randX, y: randY });
+    const playerInventory = player.getComponent(Components.Inventory)!;
+    for (let i = 0; i < 3; i++) {
+      playerInventory.items.push(Prefabs.bandage(this.world));
     }
 
-    const e = world
-      .createEntity()
-      .addComponent(Components.Enemy)
-      .addComponent(Components.Position, room.center())
-      .addComponent(Components.BlocksTile)
-      .addComponent(Components.Viewshed, { range: 5 })
-      .addComponent(Components.CombatStats, {
-        hp: 10,
-        maxHp: 10,
-        power: 5,
-        defense: 2,
-      });
+    return player;
+  }
 
-    const creatureType = rng.nextInt(0, 100);
-    const zombieGlyph = new Terminal.Glyph("Z", Color.Red);
-    const raiderGlyph = new Terminal.Glyph("R", Color.Red);
+  getRandomRoomPosition(room: Struct.Rect): Vector2 {
+    const x = this.rng.nextInt(room.v1.x, room.v2.x + 1);
+    const y = this.rng.nextInt(room.v1.y, room.v2.y + 1);
+    return { x, y };
+  }
 
-    if (creatureType < 50) {
-      e.addComponent(Components.Renderable, { glyph: zombieGlyph, zIndex: 10 });
-      e.addComponent(Components.Name, { name: "Zombie" });
+  generateBasicLevel({ width, height, level }: GenerateLevelConfig): LevelData {
+    const map = GameMap.GenMapRoomsAndCorridors(width, height);
+
+    // First room will be where the player starts
+    const playerStart = map.rooms[0].center();
+
+    // Create monsters
+    // Skip the first room with the player
+    for (let i = 1; i < map.rooms.length; i++) {
+      const room = map.rooms[i];
+
+      // 50% of spawning a bandage
+      if (this.rng.next() < 0.5) {
+        const bandage = Prefabs.bandage(this.world);
+        Prefabs.placeEntity(bandage, this.getRandomRoomPosition(room));
+      }
+
+      const creatureType = this.rng.nextInt(0, 100);
+
+      if (creatureType < 50) {
+        Prefabs.placeEntity(
+          Prefabs.zombie(this.world),
+          this.getRandomRoomPosition(room)
+        );
+      } else {
+        Prefabs.placeEntity(
+          Prefabs.raider(this.world),
+          this.getRandomRoomPosition(room)
+        );
+      }
+    }
+
+    // Create stairs, get room that isn't a player room
+    // Place Survival Crate on level 2 instead of stairs
+    const stairRoomIndex = this.rng.nextInt(1, map.rooms.length);
+    const stairRoom = map.rooms[stairRoomIndex];
+    if (level === 2) {
+      Prefabs.placeEntity(
+        Prefabs.survivalCrate(this.world),
+        this.getRandomRoomPosition(stairRoom)
+      );
     } else {
-      e.addComponent(Components.Renderable, { glyph: raiderGlyph, zIndex: 10 });
-      e.addComponent(Components.Name, { name: "Raider" });
+      Prefabs.placeEntity(
+        Prefabs.stairs(this.world),
+        this.getRandomRoomPosition(stairRoom)
+      );
     }
+
+    return {
+      map,
+      playerStart,
+    };
   }
-
-  return {
-    map,
-    player,
-  };
-}
-
-function placeEntity(entity: Entity, position: Vector2) {
-  entity.addComponent(Components.Position, position);
-}
-
-function getBandage(world: World): Entity {
-  return world
-    .createEntity()
-    .addComponent(Components.Item)
-    .addComponent(Components.Name, { name: "Bandage" })
-    .addComponent(Components.Renderable, {
-      glyph: new Glyph("b", Color.Orange),
-    })
-    .addComponent(Components.Consumable, {
-      verb: "used",
-      healing: 5,
-    })
-    .addComponent(Components.Description, {
-      text: "A bit worn, but will still heal",
-    });
 }

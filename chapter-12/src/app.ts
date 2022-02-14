@@ -4,7 +4,7 @@ import * as Components from "./components";
 import * as Systems from "./systems";
 import { GameMap } from "./game-map";
 import { GameLog } from "./game-log";
-import { generateLevel } from "./level-gen";
+import { LevelGenerator } from "./level-gen";
 import { InventoryContext, OverworldContext } from "./input";
 
 const MAP_WIDTH = 80;
@@ -16,6 +16,8 @@ export enum GameState {
   ENEMY_TURN,
   AWAITING_INPUT,
   INVENTORY,
+  WON_GAME,
+  LOST_GAME,
 }
 
 export class Game {
@@ -28,19 +30,23 @@ export class Game {
   gameState = GameState.INIT;
   map: GameMap;
   log = new GameLog();
+  levelGen = new LevelGenerator(this.world);
 
   keysOverworld = new OverworldContext(this);
   keysInventory = new InventoryContext(this);
 
+  level = 0;
+
   constructor() {
     this.registerComponents();
-    const { player, map } = generateLevel({
-      world: this.world,
+    const level = this.levelGen.generateBasicLevel({
       width: MAP_WIDTH,
       height: MAP_HEIGHT,
+      level: this.level,
     });
+    const player = this.levelGen.createPlayer(level.playerStart);
     this.player = player;
-    this.map = map;
+    this.map = level.map;
 
     this.input.setContext(this.keysOverworld);
     this.log.addMessage("Game Start!");
@@ -90,6 +96,10 @@ export class Game {
       .registerComponent(Components.Consumable)
       .registerComponent(Components.Inventory)
       .registerComponent(Components.Description)
+      .registerComponent(Components.CanDescend)
+      .registerComponent(Components.WinOnPickup)
+      .registerSystem(Systems.LevelSystem, this)
+      .registerSystem(Systems.WinSystem, this)
       .registerSystem(Systems.VisibilitySystem, this)
       .registerSystem(Systems.EnemyAISystem, this)
       .registerSystem(Systems.MeleeCombat, this)
