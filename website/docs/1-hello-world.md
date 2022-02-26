@@ -73,7 +73,7 @@ Let's break down the above.
 - To create that terminal, we passed in an object as configuration. This includes how many characters wide and tall we wanted the terminal to appear, as well as the font that we want to use. These are all supplied as part of the starter, so you don't need to worry about changing any of these settings.
 - At the end of the terminal config object, we see a reference to `mountNode`, which we defined earlier. This one might look a bit weird, because if uses a bit of Javascript shorthand. Usually keys and values look like `key: value`, such as `width: 50`. However when the key and value name both match, like `mountNode: mountNode`, Javascript lets us shorten this to `mountNode`. This is known as [object property shorthand](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer#new_notations_in_ecmascript_2015). While it's not super important to understand in detail, it often keeps code cleaner and we'll see it a lot in this tutorial.
 
-If you try refreshing the screen, you should see a black box. Not too exciting yet, so let's try to write to it!
+Now we need to actually write something to the terminal so we can see it. Nothing too exciting yet, but let's add a quick "Hello World".
 
 ```ts
 // src/app.ts

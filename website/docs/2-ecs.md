@@ -41,6 +41,7 @@ export class Game {
     });
   }
 }
+
 ```
 
 Next we need a game loop, which is some piece of code executed constantly in a 'loop' creating the game. We'll eventually handle all our processing in this loop, which will be called dozens of times each second.
@@ -69,6 +70,10 @@ export class Game {
     window.requestAnimationFrame(this.run.bind(this)); // Ask the browser to schedule the 'run' method again when it can
   }
 }
+
+// Needed to create a new instance and run our game
+const game = new Game();
+game.run();
 ```
 
 Most of the above should be pretty straightforward. The `run` method is in charge of calculating the difference in time from the last loop, and will then call the `tick` method which will start containing more logic. The use of `this.run.bind(this)` might look strange to anyone starting out with javascript, but it's a way to make sure the `this.run` we pass to the `requestAnimationFrame` function is called with the proper context. It won't show up again, so don't worry if it's not super clear at the moment.
